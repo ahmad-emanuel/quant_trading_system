@@ -1,6 +1,7 @@
 from zipline.pipeline.factors import CustomFactor
 from zipline.pipeline.data import USEquityPricing
 import numpy as np
+import warnings
 
 
 def recurs_sum(arr):
@@ -30,6 +31,10 @@ class AD(CustomFactor):
     outputs = 'cho_yesterday', 'AD_yesterday', 'cho_today', 'AD_today'
 
     def compute(self, today, assets, out, close, high, low, vol):
+
+        # ignore unimportant nan warnings
+        warnings.filterwarnings('ignore')
+
         # close location value
         clv = ((close - low) - (high - close)) / (high - low)
         ad = clv * vol

@@ -15,6 +15,8 @@ from Indicators.MACD_self import MovingAverageConvergenceDivergence
 from Indicators.EWMA_self import EWMA
 from Indicators.chaikin_oscilator import AD
 from Indicators.money_flow_index import MFI
+# reevaluate
+from reevaluate_asset import reevaluate_pipeline
 # helper
 from helper import auto_attr_check
 
@@ -77,20 +79,20 @@ class backtester:
 
     def before_trading_start(self, context, data):
         # pandas Dataframe of pipeline Output
-        context.output = pipeline_output("my_pipeline")
+        output = pipeline_output("my_pipeline")
 
         # will be filled with weights  -1<float<1
-        weighted_signal = pd.Series(index=context.output.index, dtype=np.float32)
+        weighted_signal = pd.Series(index=output.index, dtype=np.float32)
 
-        for index, value in context.output.iterrows():
+        for index, value in output.iterrows():
 
-            if value.ADX > 20:  # there is a trend
-                weighted_signal[index] = self.reevaluate_trend(value)
+            if value.ADX >= 30:  # there is a trend
+                weighted_signal[index] = reevaluate_pipeline(value,self.weights_trend)
             else:  # there is either non-trend or NAN
-                weighted_signal[index] = self.reevaluate_non_trend(value)
+                weighted_signal[index] = reevaluate_pipeline(value, self.weights_non_trend)
 
         # will be filled with trade signals  int: -1,0,1
-        final_signal = pd.Series(index=context.output.index, dtype=np.int8)
+        final_signal = pd.Series(index=output.index, dtype=np.int8)
 
         for index, value in weighted_signal.iteritems():
             if value > self.DB:
@@ -102,7 +104,7 @@ class backtester:
 
 
         #### TEST ######
-        # context.output.to_pickle('pip_result')
+        # output.to_pickle('pip_result')
         #
         # test = pd.DataFrame(index=final_signal.index)
         # test['weighted Signal'] = weighted_signal

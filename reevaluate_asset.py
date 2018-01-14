@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def reevaluate_trend(asset, weights):
+def reevaluate_pipeline(asset, weights):
     temp = np.zeros(9, dtype=np.int8)
 
     # reevaluate moving average convergence divergence
@@ -13,9 +13,9 @@ def reevaluate_trend(asset, weights):
         temp[0] = 0
 
     # reevaluate RSI
-    if asset.RSI < 30:
+    if asset.RSI <= 30:
         temp[1] = 1
-    elif asset.RSI > 70:
+    elif asset.RSI >= 70:
         temp[1] = -1
     else:
         temp[1] = 0

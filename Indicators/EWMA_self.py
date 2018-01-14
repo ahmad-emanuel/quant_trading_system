@@ -1,6 +1,7 @@
 from zipline.pipeline.factors import CustomFactor
 from zipline.pipeline.data import USEquityPricing
 import pandas as pd
+import warnings
 
 
 class EWMA(CustomFactor):
@@ -16,6 +17,9 @@ class EWMA(CustomFactor):
     outputs = 'yesterday','today'
 
     def compute(self, today, assets, out, close):
+
+        # ignore unimportant future version warnings
+        warnings.filterwarnings('ignore')
 
         temp = pd.ewma(close, span=7)
         out.today[:] = temp[-1]

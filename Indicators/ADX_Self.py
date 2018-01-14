@@ -31,7 +31,7 @@ class ADX(CustomFactor):
         # 14-day EMA
         span = 14
         decay_rate = 2. / (span + 1.)
-        weights = weights_long = np.full(span, decay_rate, float) ** np.arange(span + 1, 1, -1)
+        weights = np.full(span, decay_rate, float) ** np.arange(span + 1, 1, -1)
 
         # return EMA
         out[:] = np.average(dx_frame, axis=0, weights=weights)
