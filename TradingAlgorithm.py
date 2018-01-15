@@ -2,6 +2,11 @@ import numpy as np
 import pandas as pd
 from zipline import run_algorithm
 from zipline.api import attach_pipeline, pipeline_output
+# schedule function
+from zipline.api import schedule_function
+from zipline.utils.events import date_rules
+from zipline.utils.events import time_rules
+from zipline.api import order_target_percent
 # Pipeline Imports
 from zipline.pipeline import Pipeline
 from zipline.pipeline.factors import RSI
@@ -17,6 +22,7 @@ from Indicators.chaikin_oscilator import AD
 from Indicators.money_flow_index import MFI
 # reevaluate
 from reevaluate_asset import reevaluate_pipeline
+from normalize_weights import normalize_weights
 # helper
 from helper import auto_attr_check
 
@@ -71,6 +77,13 @@ class backtester:
         )
 
     def initialize(self, context):
+        # Schedule our rebalance function to run every day, after a 1 hour, when the market opens.
+        schedule_function(
+            self.rebalance,
+            date_rules.every_day(),
+            time_rules.market_open(hours = 1, minutes = 0)
+        )
+
         my_pipe = self.make_pipeline()
         attach_pipeline(my_pipe, "my_pipeline")
 
@@ -78,50 +91,77 @@ class backtester:
         pass
 
     def before_trading_start(self, context, data):
+
         # pandas Dataframe of pipeline Output
-        output = pipeline_output("my_pipeline")
+        context.output = pipeline_output("my_pipeline")
 
-        # will be filled with weights  -1<float<1
-        weighted_signal = pd.Series(index=output.index, dtype=np.float32)
-
-        for index, value in output.iterrows():
-
-            if value.ADX >= 30:  # there is a trend
-                weighted_signal[index] = reevaluate_pipeline(value,self.weights_trend)
-            else:  # there is either non-trend or NAN
-                weighted_signal[index] = reevaluate_pipeline(value, self.weights_non_trend)
-
-        # will be filled with trade signals  int: -1,0,1
-        final_signal = pd.Series(index=output.index, dtype=np.int8)
-
-        for index, value in weighted_signal.iteritems():
-            if value > self.DB:
-                final_signal[index] = 1
-            elif self.DS <= value <= self.DB:
-                final_signal[index] = 0
-            else:
-                final_signal[index] = -1
+        # generate weights based on pipeline output to go or long
+        context.weights = self.compute_target_weights(context, data)
 
 
         #### TEST ######
         # output.to_pickle('pip_result')
-        #
         # test = pd.DataFrame(index=final_signal.index)
         # test['weighted Signal'] = weighted_signal
         # test['final Signal'] = final_signal
         # test.to_pickle('test_signal')
 
-        print('before trading ran')
+        print('before trading ran',len(context.weights))
 
-    def run(self):
-        START = pd.Timestamp("2015-02-10", tz="EST")
-        END = pd.Timestamp("2015-03-01", tz="EST")
-        self.result = run_algorithm(start=START, end=END,
+    def run(self,Start,End):
+        self.result = run_algorithm(start=Start, end=End,
                                     initialize=self.initialize,
                                     before_trading_start=self.before_trading_start,
-                                    capital_base=10000,
+                                    capital_base=100000,
                                     handle_data=self.handle_data,
                                     bundle='quantopian-quandl')
 
 
         self.result.to_csv('Trading_result')
+
+    def compute_target_weights(self, context, data):
+
+        # will be filled with weights  -1<float<1
+        weighted_signal = pd.Series(index=context.output.index, dtype=np.float32)
+
+        for index, value in context.output.iterrows():
+
+            if value.ADX >= 30:  # there is a trend
+                weighted_signal[index] = reevaluate_pipeline(value, self.weights_trend)
+            else:  # there is either non-trend or NAN
+                weighted_signal[index] = reevaluate_pipeline(value, self.weights_non_trend)
+
+        # will be filled with trade signals  int: -1,0,1
+        final_signal = pd.Series(index=context.output.index, dtype=np.int8)
+
+        for index, value in weighted_signal.iteritems():
+            if value >= self.DB and data.can_trade(index):
+                final_signal[index] = 1
+            elif value <= self.DS and data.can_trade(index):
+                final_signal[index] = -1
+            else:
+                final_signal[index] = 0
+
+        # Initialize empty target weights dictionary.
+        # This will map securities to their target weight.
+        weights = {}
+
+        for asset, signal in final_signal.iteritems():
+            if signal != 0:
+                weights[asset] = abs(weighted_signal[asset]) * final_signal[asset]
+
+        # Exit positions in our portfolio if they are not
+        # in our longs or shorts lists.
+        for security in context.portfolio.positions:
+            if security not in context.weights.keys():
+                weights[security] = 0
+
+        return normalize_weights(weights)
+
+    def rebalance(self, context, data):
+
+        for asset, percent in context.weights.items():
+            order_target_percent(
+                asset=asset,
+                target=percent
+            )
