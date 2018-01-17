@@ -36,16 +36,18 @@ class backtester:
     DS = float
     result = pd.DataFrame
 
-    def __init__(self, weights_trend, weights_non_trend, db, ds):
+    def __init__(self, position):
 
         # for each indicator, we must have a weight coefficient
-        if len(weights_non_trend) != 9 or len(weights_trend) != 9:
+        if len(position[0]) != 9 or len(position[1]) != 9:
             raise ValueError("the length of weights must be equal to number of indicators!")
+        if abs(np.sum(position[0]) - np.sum(position[1])) > 0.0000001:
+            raise ValueError("the sum of weights array must be equal to one!")
 
-        self.weights_trend = weights_trend
-        self.weights_non_trend = weights_non_trend
-        self.DB = db
-        self.DS = ds
+        self.weights_trend = position[0]
+        self.weights_non_trend = position[1]
+        self.DB = position[2]
+        self.DS = position[3]
 
     def make_pipeline(self):
         macd = MovingAverageConvergenceDivergence()
@@ -57,8 +59,6 @@ class backtester:
         stoch = Stochastic()
         momentum = Momentum()
         ewma = EWMA()
-
-
 
         return Pipeline(
             columns={
@@ -108,8 +108,10 @@ class backtester:
 
         print('before trading ran',len(context.weights))
 
-    def run(self,Start,End):
-        self.result = run_algorithm(start=Start, end=End,
+    def run(self):
+        START = pd.Timestamp("2015-02-10", tz="EST")
+        END = pd.Timestamp("2015-03-01", tz="EST")
+        self.result = run_algorithm(start=START, end=END,
                                     initialize=self.initialize,
                                     before_trading_start=self.before_trading_start,
                                     capital_base=100000,
@@ -117,7 +119,9 @@ class backtester:
                                     bundle='quantopian-quandl')
 
 
-        self.result.to_csv('Trading_result')
+        #self.result.to_csv('Trading_result')
+        print(np.mean(self.result.sharpe))
+        return np.mean(self.result.sharpe)
 
     def compute_target_weights(self, context, data):
 
