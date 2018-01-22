@@ -1,20 +1,17 @@
-from TradingAlgorithm import backtester
-from PSO import rand_arr_sum_one
-import numpy as np
+
+import pandas as pd
 
 
-weights_trend = rand_arr_sum_one(9)
+print(str(3)+','+str(1))
+df = pd.DataFrame(columns=['first','second'])
 
-weights_non_trend = rand_arr_sum_one(9)
+series = pd.Series(index=['first','second'])
 
-DB = 0.15
-DS = -0.20
 
-if abs(np.sum(weights_non_trend) - np.sum(weights_trend)) < 0.0000001:
-    position = [weights_trend, weights_non_trend, DB, DS]
-    b = backtester(position)
-    mean_sharpe = b.run()
-    print(mean_sharpe)
-else:
-    print('weights array are not correct')
-    print(np.sum(weights_non_trend), np.sum(weights_trend))
+series['first'] = 1.111
+series.second = 2.2222
+series.first = 3.333333
+
+df.loc['1'] = series
+
+print('done')

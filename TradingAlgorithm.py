@@ -66,7 +66,7 @@ class backtester:
                 'MACD': macd,   # Moving average convergence divergence
                 'ADX': adx,
                 'Commodity Channel Index': cci,
-                'Bollinger Bands': bol_band,     # Default Window Length: 20-day    Default K=2 (Coefficient of Standard diviation)
+                'Bollinger Bands': bol_band,     # Default Window Length: 20-day     Default K=2 (Coefficient of Standard diviation)
                 'latest close': latest,          # Default Window Length: 2-day      generate last 2 close prices
                 'Stochastic': stoch,             # Default Window Length: 5-day      generte %K lines of today and yesterday
                 'Momentum': momentum,            # Default Window Length: 20-day     geneate the Momentum of yesterday and today related to close price of 20days ago
@@ -100,7 +100,7 @@ class backtester:
 
 
         #### TEST ######
-        # output.to_pickle('pip_result')
+        #context.output.to_pickle('pipeline_result')
         # test = pd.DataFrame(index=final_signal.index)
         # test['weighted Signal'] = weighted_signal
         # test['final Signal'] = final_signal
@@ -120,8 +120,12 @@ class backtester:
 
 
         #self.result.to_csv('Trading_result')
-        print(np.mean(self.result.sharpe))
-        return np.mean(self.result.sharpe)
+        #print(np.mean(self.result.sharpe))
+        #return np.mean(self.result.sharpe)
+        #####test
+        mean_sharpe = np.mean(self.result.sharpe)
+        print(mean_sharpe)
+        return mean_sharpe,self.result
 
     def compute_target_weights(self, context, data):
 

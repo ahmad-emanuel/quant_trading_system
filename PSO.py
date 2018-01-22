@@ -21,7 +21,11 @@ def update_velocity_micro_particle(w, c1, c2, velocity, position, post_best, glo
 
     vel_cognitive = c1 * r1 * (post_best - position)
     vel_social = c2 * r2 * (global_best - position)
-    return (w * velocity) + vel_cognitive + vel_social
+    new_velocity = (w * velocity) + vel_cognitive + vel_social
+    if new_velocity != 0:
+        return new_velocity
+    else:
+        return np.random.random_sample()
 
 
 def update_position_micro_particle(position, velocity, bounds):
@@ -36,6 +40,26 @@ def update_position_micro_particle(position, velocity, bounds):
         position = bounds[0]
 
     return position
+
+
+"""
+Helper of class PSO
+"""
+
+
+def analyse_result(position, df):
+    temp = pd.Series(
+        index=['position', 'algorithm_period_return', 'alpha', 'benchmark_period_return', 'returns', 'sharpe','portfolio_value'])
+
+    temp.position = position
+    temp.algorithm_period_return = np.mean(df.algorithm_period_return)
+    temp.alpha = np.mean(df.alpha)
+    temp.benchmark_period_return = np.mean(df.benchmark_period_return)
+    temp.returns = np.mean(df.returns)
+    temp.sharpe = np.mean(df.sharpe)
+    temp.portfolio_value = np.mean(df.portfolio_value[-1])
+
+    return temp
 
 
 def sum_correction(position):
@@ -58,6 +82,9 @@ class Particle(object):
         self.current_obj = -10000.0
         self.bounds = pd.Series([(0.0,1.0),(0.0,1.0),(-1.0,0.0)],index=['weights','DB','DS'])
 
+        ##########test
+        self.datafra_result = pd.DataFrame()
+
         # initialize position
         self.initialize_position()
 
@@ -76,10 +103,18 @@ class Particle(object):
     def evaluate(self, obj_func):
 
         back_tester = obj_func(self.position)
-        self.current_obj = back_tester.run()
+        #self.current_obj = back_tester.run()
+
+        ##############
+        #TEST
+        ##############
+        self.current_obj, self.datafra_result = back_tester.run()
+
+
+
 
         # check to see if the current position is an individual best
-        # type of optimization is MINIMIZE
+        # type of optimization is maximize
         if self.current_obj > self.obj_best:
             self.post_best = self.position.copy()
             self.obj_best = self.current_obj
@@ -90,8 +125,8 @@ class Particle(object):
             raise ValueError('the dimension of global best did not correspond with dimension of particles')
         else:
             w = 0.5  # constant inertia weight (how much to weigh the previous velocity)
-            c1 = 2  # cognitive constant
-            c2 = 2  # social constant
+            c1 = 1  # cognitive constant
+            c2 = 1  # social constant
 
             # update velocity of trend & non-trend weights
             for j in range(2):
@@ -143,6 +178,8 @@ class PSO(object):
         self.obj_func = obj_func
         self.swarm_size = swarm_size
         self.max_iter = max_iter
+        ##### test
+        self.performance = pd.DataFrame(columns=['position', 'algorithm_period_return', 'alpha', 'benchmark_period_return', 'returns', 'sharpe','portfolio_value'])
 
     def run(self):
         # create swarm (population)
@@ -152,6 +189,7 @@ class PSO(object):
 
         # optimization loop
         while self.iter_num < self.max_iter:
+            count = 0
             # iterate over particles in swarm and evaluate fitness
             for i in range(self.swarm_size):
                 swarm[i].evaluate(self.obj_func)
@@ -161,6 +199,11 @@ class PSO(object):
                 if swarm[i].current_obj > self.global_best_fit:
                     self.global_best_sol = swarm[i].position.copy()
                     self.global_best_fit = swarm[i].current_obj
+                    ##### test
+                    self.performance.loc[str(self.iter_num)+','+str(count)] = analyse_result(swarm[i].position.copy(),
+                                                                                             swarm[i].datafra_result)
+                    count += 1
+
 
             # update velocity and position
             for i in range(self.swarm_size):
@@ -168,3 +211,7 @@ class PSO(object):
                 swarm[i].update_position()
 
             self.iter_num += 1
+
+            ######## test
+            self.performance.to_pickle('global_best_solutions')
+            print('performance stored'+str(self.iter_num))
