@@ -84,6 +84,11 @@ class backtester:
             time_rules.market_open(hours = 1, minutes = 0)
         )
 
+        # max_minute = 6 * 60 + 30
+        #
+        # for minute in range(30, max_minute, 60):
+        #     schedule_function(self.rebalance, date_rules.every_day(), time_rules.market_open(minutes=minute))
+
         my_pipe = self.make_pipeline()
         attach_pipeline(my_pipe, "my_pipeline")
 
@@ -109,8 +114,8 @@ class backtester:
         print('before trading ran',len(context.weights))
 
     def run(self):
-        START = pd.Timestamp("2015-02-10", tz="EST")
-        END = pd.Timestamp("2015-03-01", tz="EST")
+        START = pd.Timestamp("2015-02-01", tz="EST")
+        END = pd.Timestamp("2015-04-01", tz="EST")
         self.result = run_algorithm(start=START, end=END,
                                     initialize=self.initialize,
                                     before_trading_start=self.before_trading_start,

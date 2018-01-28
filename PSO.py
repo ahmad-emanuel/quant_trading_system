@@ -67,7 +67,7 @@ def sum_correction(position):
     return [a / s for a in position]
 
 
-""""
+"""
 Particle Class
 """
 class Particle(object):
@@ -109,8 +109,6 @@ class Particle(object):
         #TEST
         ##############
         self.current_obj, self.datafra_result = back_tester.run()
-
-
 
 
         # check to see if the current position is an individual best

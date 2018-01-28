@@ -1,6 +1,13 @@
 
 import pandas as pd
 
+max_minute = 6*60 + 30
+
+for minute in range(30,max_minute,60):
+    print(minute)
+
+
+
 
 print(str(3)+','+str(1))
 df = pd.DataFrame(columns=['first','second'])

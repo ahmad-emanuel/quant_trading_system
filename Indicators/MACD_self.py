@@ -34,7 +34,7 @@ class MovingAverageConvergenceDivergence(CustomFactor):
     """
     inputs = (USEquityPricing.close,)
     outputs = 'macd_yesterday','trigger_yesterday','macd_today','trigger_today'
-    #outputs = 'MACD_yesterday','trigger_yesterday','MACD_today','trigger_today'
+
     # We don't use the default form of `params` here because we want to
     # dynamically calculate `window_length` from the period lengths in our
     # __new__.

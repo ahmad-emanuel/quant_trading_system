@@ -12,7 +12,7 @@ def normalize_weights(weights):
         elif w<0:
             short = short + w
 
-    # we go long (short) with 0.5 (half) of capital base
+    # we go long (short) with 50% (half) of capital base
     long = long * 2
     short = short * 2
 
