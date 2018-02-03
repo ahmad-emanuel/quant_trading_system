@@ -20,13 +20,13 @@ class Stochastic(CustomFactor):
         # ignore unimportant nan warnings
         warnings.filterwarnings('ignore')
 
-        # tiefstes Tief der Periode für heute
+        #   tiefstes Tief
         LL_t = np.nanmin(low[-1:0:-1], axis=0)
 
         # gestern
         LL_t_1 = np.nanmin(low[-2::-1], axis=0)
 
-        # höchstes Hoch der Periode für heute
+        #   hcechste Hoechst
         HH_t = np.nanmax(high[-1:0:-1], axis=0)
 
         # gestern

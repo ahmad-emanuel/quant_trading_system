@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+import copy
+
 
 """
 Helper methods of class particle
@@ -48,6 +50,7 @@ Helper of class PSO
 
 
 def analyse_result(position, df):
+
     temp = pd.Series(
         index=['position', 'algorithm_period_return', 'alpha', 'benchmark_period_return', 'returns', 'sharpe','portfolio_value'])
 
@@ -103,7 +106,6 @@ class Particle(object):
     def evaluate(self, obj_func):
 
         back_tester = obj_func(self.position)
-        #self.current_obj = back_tester.run()
 
         ##############
         #TEST
@@ -114,7 +116,7 @@ class Particle(object):
         # check to see if the current position is an individual best
         # type of optimization is maximize
         if self.current_obj > self.obj_best:
-            self.post_best = self.position.copy()
+            self.post_best = copy.deepcopy(self.position)
             self.obj_best = self.current_obj
 
     # update the velocity of particle
@@ -176,7 +178,7 @@ class PSO(object):
         self.obj_func = obj_func
         self.swarm_size = swarm_size
         self.max_iter = max_iter
-        ##### test
+        # test performance
         self.performance = pd.DataFrame(columns=['position', 'algorithm_period_return', 'alpha', 'benchmark_period_return', 'returns', 'sharpe','portfolio_value'])
 
     def run(self):
@@ -195,21 +197,21 @@ class PSO(object):
                 # determine the best global particle
                 # type of optimization is maximize
                 if swarm[i].current_obj > self.global_best_fit:
-                    self.global_best_sol = swarm[i].position.copy()
+                    self.global_best_sol = copy.deepcopy(swarm[i].position)
                     self.global_best_fit = swarm[i].current_obj
-                    ##### test
-                    self.performance.loc[str(self.iter_num)+','+str(count)] = analyse_result(swarm[i].position.copy(),
+                    #   store global best
+                    self.performance.loc[str(self.iter_num)+'.'+str(count)] = analyse_result(copy.deepcopy(swarm[i].position),
                                                                                              swarm[i].datafra_result)
-                    count += 1
 
+                    count += 1
 
             # update velocity and position
             for i in range(self.swarm_size):
                 swarm[i].update_velocity(self.global_best_sol)
                 swarm[i].update_position()
 
-            self.iter_num += 1
-
-            ######## test
+            #   store global best
             self.performance.to_pickle('global_best_solutions')
-            print('performance stored'+str(self.iter_num))
+            print('performance stored in iteration :  '+str(self.iter_num))
+
+            self.iter_num += 1

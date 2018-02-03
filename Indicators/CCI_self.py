@@ -5,17 +5,15 @@ from zipline.pipeline.data import USEquityPricing
 
 class CCI(CustomFactor):
     """
-    Commodity Channel Index
+        Commodity Channel Index
 
-    Momentum indicator
+        Momentum indicator
 
-    **Default Inputs:** USEquityPricing.close, USEquityPricing.high, USEquityPricing.low
+        **Default Inputs:** USEquityPricing.close, USEquityPricing.high, USEquityPricing.low
+        **Default Window Length:** 14
 
-    **Default Window Length:** 14
-
-    http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:commodity_channel_index_cci
+        http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:commodity_channel_index_cci
     """
-
     inputs = [USEquityPricing.high, USEquityPricing.low, USEquityPricing.close]
     window_length = 14 + 1
     outputs = ['CCI_t_1', 'CCI_t']

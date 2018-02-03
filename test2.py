@@ -1,24 +1,16 @@
-
 import pandas as pd
 
-max_minute = 6*60 + 30
+df = pd.read_pickle('global_best_solutions')
 
-for minute in range(30,max_minute,60):
-    print(minute)
+# trend = sum(df.position[-2][0])
+# non_trend = sum(df.position[-2][1])
 
+i= 0
+j= 0
+trend = df.ix[str(i)+'.'+str(j),'position'][0]
+nontrend = df.ix[str(i)+'.'+str(j), 'position'][1]
 
+a = sum(trend)
+b = sum(nontrend)
 
-
-print(str(3)+','+str(1))
-df = pd.DataFrame(columns=['first','second'])
-
-series = pd.Series(index=['first','second'])
-
-
-series['first'] = 1.111
-series.second = 2.2222
-series.first = 3.333333
-
-df.loc['1'] = series
-
-print('done')
+print('finito')

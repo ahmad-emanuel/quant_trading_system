@@ -9,17 +9,20 @@ from zipline.utils.events import time_rules
 from zipline.api import order_target_percent
 # Pipeline Imports
 from zipline.pipeline import Pipeline
+# indicators
 from zipline.pipeline.factors import RSI
-from Indicators.CCI_self import CCI
-from Indicators.ADX_Self import ADX
-from Indicators.Bollinger_Bands_self import BollingerBands
-from Indicators.Latest_self import Latest
-from Indicators.Stochastic_Oscillator_self import Stochastic
-from Indicators.Momentum_self import Momentum
-from Indicators.MACD_self import MovingAverageConvergenceDivergence
-from Indicators.EWMA_self import EWMA
-from Indicators.chaikin_oscilator import AD
-from Indicators.money_flow_index import MFI
+import sys
+sys.path.append("E:\Quantopian\quant_trading_system\Indicators")
+from CCI_self import CCI
+from ADX_Self import ADX
+from Bollinger_Bands_self import BollingerBands
+from Latest_self import Latest
+from Stochastic_Oscillator_self import Stochastic
+from Momentum_self import Momentum
+from MACD_self import MovingAverageConvergenceDivergence
+from EWMA_self import EWMA
+from chaikin_oscilator import AD
+from money_flow_index import MFI
 # reevaluate
 from reevaluate_asset import reevaluate_pipeline
 from normalize_weights import normalize_weights
@@ -41,7 +44,7 @@ class backtester:
         # for each indicator, we must have a weight coefficient
         if len(position[0]) != 9 or len(position[1]) != 9:
             raise ValueError("the length of weights must be equal to number of indicators!")
-        if abs(np.sum(position[0]) - np.sum(position[1])) > 0.0000001:
+        if abs(np.sum(position[0]) - np.sum(position[1])) > 0.000001:
             raise ValueError("the sum of weights array must be equal to one!")
 
         self.weights_trend = position[0]
@@ -111,7 +114,7 @@ class backtester:
         # test['final Signal'] = final_signal
         # test.to_pickle('test_signal')
 
-        print('before trading ran',len(context.weights))
+        print('before trading ran. number of positions:  '+ str(len(context.weights)))
 
     def run(self):
         START = pd.Timestamp("2015-02-01", tz="EST")

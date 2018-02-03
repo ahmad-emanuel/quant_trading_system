@@ -7,7 +7,8 @@ from pandas import Timestamp
 
 def make_pipeline():
     print("make_pipe_ran")
-    return Pipeline()
+    return Pipeline(
+    )
 
 def initialize(context):
     my_pipe = make_pipeline()

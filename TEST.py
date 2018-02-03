@@ -1,45 +1,28 @@
-from zipline.pipeline import Pipeline
-from zipline.api import attach_pipeline, pipeline_output
-from zipline import run_algorithm
-from zipline.pipeline.factors import MovingAverageConvergenceDivergenceSignal
+from TradingAlgorithm import backtester
 import pandas as pd
-# indicator
-from Indicators.TEst_indicator import MFI
+
+# import optimization run results
+test_result = pd.read_pickle('global_best_solutions_1')
+
+# generate global best position
+best_position = test_result.position[-1]
+
+#### test
+trend = sum(best_position[0])
+non_trend = sum(best_position[1])
+print(trend - non_trend)
+######
+# rerun the global best position
+bs = backtester(best_position)
+mean_sharpe, backtest_result = bs.run()
+
+backtest_result.to_csv('result_csv')
+#backtest_result.to_pickle('gbest_reslt')
+# run pyfolio
+# returns, positions, transactions = pf.utils.extract_rets_pos_txn_from_zipline(backtest_result)
+# pf.create_full_tear_sheet(returns, positions=positions, transactions=transactions,
+#                           live_start_date='2015-02-01', round_trips=True)
 
 
-def make_pipeline():
 
-    return Pipeline(
-        columns={
-            'MFI': MFI()
-        }
-    )
-
-
-def initialize(context):
-    my_pipe = make_pipeline()
-    attach_pipeline(my_pipe, "my_pipeline")
-
-
-def handle_data(context, data):
-    pass
-
-
-def before_trading_start(context, data):
-    # pandas Dataframe of pipeline Output
-    context.output = pipeline_output("my_pipeline")
-
-    # test
-    #context.output.to_pickle('pip_result')
-    print('before trading ran')
-    exit()
-
-#### run #####
-START = pd.Timestamp("2015-02-10", tz="EST")
-END = pd.Timestamp("2015-02-12", tz="EST")
-result = run_algorithm(start=START, end=END,
-                            initialize=initialize,
-                            before_trading_start=before_trading_start,
-                            capital_base=10000,
-                            handle_data=handle_data,
-                            bundle='quantopian-quandl')
+print('finito')
