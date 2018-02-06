@@ -2,7 +2,7 @@ from zipline.api import order, record, symbol
 from zipline import run_algorithm
 from zipline.pipeline import Pipeline
 from zipline.api import attach_pipeline, pipeline_output
-from pandas import Timestamp
+import pandas as pd
 
 
 def make_pipeline():
@@ -26,12 +26,12 @@ def before_trading_start(context, data):
 
 
 if __name__ == '__main__':
-    START = Timestamp("2015-01-01", tz="EST")
-    END = Timestamp("2015-03-03", tz="EST")
+    START = pd.Timestamp("2015-01-01", tz="EST")
+    END = pd.Timestamp("2015-03-03", tz="EST")
     result = run_algorithm(start=START, end=END,
                            initialize=initialize,
                            capital_base=10000,
                            handle_data=handle_data,
                            before_trading_start=before_trading_start,
                            bundle='quantopian-quandl')
-    print(result)
+    result.to_pickle('Zipline_result')

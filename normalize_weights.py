@@ -13,8 +13,10 @@ def normalize_weights(weights):
             short = short + w
 
     # we go long (short) with 50% (half) of capital base
-    long = long * 2
-    short = short * 2
+    if short != 0:
+        long = long * 2
+    if long != 0:
+        short = short * 2
 
     for key, value in weights.items():
         if value>0:

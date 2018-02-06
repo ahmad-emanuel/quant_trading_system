@@ -117,6 +117,8 @@ class backtester:
         print('before trading ran. number of positions:  '+ str(len(context.weights)))
 
     def run(self):
+        # START = pd.Timestamp("2015-11-01", tz="EST")
+        # END = pd.Timestamp("2016-01-01", tz="EST")
         START = pd.Timestamp("2015-02-01", tz="EST")
         END = pd.Timestamp("2015-04-01", tz="EST")
         self.result = run_algorithm(start=START, end=END,

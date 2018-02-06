@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 test = pd.read_pickle('global_best_solutions')
-test2 = pd.read_pickle('global_best_solutions_1')
+# test2 = pd.read_pickle('global_best_solutions_1')
 
 x = test.index.values
 y = test.sharpe
